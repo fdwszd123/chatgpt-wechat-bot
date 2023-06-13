@@ -2,6 +2,10 @@ import { WechatyBuilder } from "wechaty";
 import qrcodeTerminal from "qrcode-terminal";
 import config from "./config.js";
 import ChatGPT from "./chatgpt.js";
+import { isSong } from "./utils.js";
+import { FileBox } from "file-box";
+import path from "path";
+const __dirname = path.resolve();
 
 let bot: any = {};
 const startTime = new Date();
@@ -18,10 +22,30 @@ async function onMessage(msg) {
   const room = msg.room();
   const alias = (await contact.alias()) || (await contact.name());
   const isText = msg.type() === bot.Message.Type.Text;
+
   if (msg.self()) {
     return;
   }
+  const song = isSong(receiver, room, content);
+  console.log("song", song);
+  if (song) {
+    let filePath = path.resolve(__dirname, "./test.mp3");
+    // const voiceMessage = await bot.Message.createVoice(filePath);
+    const voiceMessage = new bot.MediaMessage(filePath);
+    // let songFile = FileBox.fromFile(filePath);
+    try {
+      if (room) {
+        await room.say(voiceMessage);
+      } else {
+        await room.say(voiceMessage);
+      }
 
+      console.log("语音消息已发送");
+    } catch (error) {
+      console.error("发送语音消息时出错：", error);
+    }
+    return;
+  }
   if (room && isText) {
     const topic = await room.topic();
     console.log(

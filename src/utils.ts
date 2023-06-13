@@ -1,3 +1,4 @@
+import config from "./config.js";
 const sleep = (time: number) => {
   return new Promise((resolve) => {
     setTimeout(resolve, time);
@@ -38,4 +39,22 @@ export const retryRequest = async <T>(
   }
 
   return output[1];
+};
+
+export const isSong = (receiver, room, content: string) => {
+  let str = "";
+  if (room) {
+    const pattern = RegExp(`^@${receiver.name()}\\s+${config.groupKey}[\\s]*`);
+    str = content.replace(pattern, "");
+  } else {
+    if (config.privateKey === "") {
+      str = content.substring(config.privateKey.length).trim();
+    }
+  }
+  let arr = str.split("-");
+  if (arr.length == 2 && arr[0] == "点歌" && arr[1] != "") {
+    return arr[1];
+  } else {
+    return false;
+  }
 };
